@@ -1,3 +1,4 @@
+import os
 import win32com.client
 import sys
 import subprocess
@@ -118,15 +119,41 @@ class SapGui():
                     self.session.findById("wnd[0]/usr/txtRSYST-BNAME").text = kullaniciadi
                     self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = sifre
                     self.session.findById("wnd[0]").sendVKey(0)
-                    return "Giriş Yapıldı."
+                    return
                 except:
-                    return "Giriş Yapıldı."
+                    return
 
         except:
             print(sys.exc_info()[0])
             return "Giriş Hatası !"
+        
+    def sapKapat(self):
+        os.system("taskkill /f /im sapgui.exe")
 
-
+    def acıkmı(self):
+            try:
+                self.SapGuiAuto = win32com.client.GetObject("SAPGUI")
+                if not type(self.SapGuiAuto) == win32com.client.CDispatch:
+                    return
+                Durum = {"Durum":"Açık.","Mesaj":"SAP Uygulaması Açık."}
+                return Durum 
+            except:
+                Durum ={"Durum":"Kapalı.","Mesaj":"SAP Uygulaması Kapalı."}
+                return Durum
+    
+    def baglımı(self):
+            try:
+                self.connection = self.application.Children(0)
+                if not type(self.connection) == win32com.client.CDispatch:
+                    self.application = None
+                    self.SapGuiAuto = None
+                    return
+                Durum = {"Durum":"Bağlı.","Mesaj":"Kullanıcı Girişi Yapıldı."}
+                return Durum 
+            except:
+                Durum ={"Durum":"Bağlı Değil.","Mesaj":"Kullanıcı Girişi Yapılmadı."}
+                return Durum 
+            
     def pa40(self):
         self.session.findById("wnd[0]/tbar[0]/okcd").text = "pa40"
         self.session.findById("wnd[0]").sendVKey (0)
