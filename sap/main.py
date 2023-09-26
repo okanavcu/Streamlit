@@ -20,7 +20,7 @@ class SapGui():
                 self.SapGuiAuto = None
                 return
 
-            self.application.HistoryEnabled = False
+            self.application.HistoryEnabled = True
 
             self.connection = self.application.Children(0)
             if not type(self.connection) == win32com.client.CDispatch:
