@@ -72,7 +72,10 @@ class SapGui():
         except:
             pass
         
-    def SapLogin(self,kullaniciadi,sifre): 
+    def SapLogin(self,kullaniciadi,sifre):
+
+        if kullaniciadi == "" or sifre == "":
+            return
         try:
             
             try:
@@ -82,7 +85,7 @@ class SapGui():
             except:
                 path = r"C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplogon.exe"
                 subprocess.Popen(path)
-                time.sleep(10)
+                time.sleep(5)
                 self.SapGuiAuto = win32com.client.GetObject("SAPGUI")
                 if not type(self.SapGuiAuto) == win32com.client.CDispatch:
                     return
@@ -119,16 +122,16 @@ class SapGui():
                     self.session.findById("wnd[0]/usr/txtRSYST-BNAME").text = kullaniciadi
                     self.session.findById("wnd[0]/usr/pwdRSYST-BCODE").text = sifre
                     self.session.findById("wnd[0]").sendVKey(0)
-                    return
+                    sapmsg=self.session.findById("wnd[0]/sbar").text
+                    return sapmsg
                 except:
-                    return
-
+                    pass
         except:
             print(sys.exc_info()[0])
             return "Giriş Hatası !"
         
     def sapKapat(self):
-        os.system("taskkill /f /im sapgui.exe")
+        os.system("taskkill /f /im saplogon.exe")
 
     def acıkmı(self):
             try:
@@ -153,7 +156,18 @@ class SapGui():
             except:
                 Durum ={"Durum":"Bağlı Değil.","Mesaj":"Kullanıcı Girişi Yapılmadı."}
                 return Durum 
-            
+    
+    def girisyapıldımı(self):
+            if self.session.ActiveWindow.text != "SAP Easy Access":
+                if self.session.ActiveWindow.text == "Bilgi":
+                    self.session.findById("wnd[1]").sendVKey (0)
+                    return 1
+                else:
+                    sapmsg=self.session.findById("wnd[0]/sbar").text
+                    return sapmsg
+            else:
+                return 1
+
     def pa40(self):
         self.session.findById("wnd[0]/tbar[0]/okcd").text = "pa40"
         self.session.findById("wnd[0]").sendVKey (0)
