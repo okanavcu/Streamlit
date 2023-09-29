@@ -63,14 +63,10 @@ class SapGui():
         # COM altyapısını serbest bırak
         pythoncom.CoUninitialize()
 
-    def personelara(self):    
+    def personelara(self,ara):    
         self.session.findById("wnd[0]").maximize
-        self.session.findById("wnd[0]/usr/ctxtRP50G-PERNR").text = "=...17792564146"
+        self.session.findById("wnd[0]/usr/ctxtRP50G-PERNR").text = ara
         self.session.findById("wnd[0]").sendVKey (0)
-        try:
-            assert self.session.ActiveWindow.Text.startswith("Personel numarası")
-        except:
-            pass
         
     def SapLogin(self,kullaniciadi,sifre):
 

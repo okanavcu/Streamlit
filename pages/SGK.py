@@ -169,9 +169,14 @@ if op == "Şifre Paneli":
             SGKSicilNo = st.text_input("SGK SİCİL NO",placeholder="SGK Sicil No",value=secilisatir[0].get("SGK SİCİL NO") if secilisatir else None)
             IsYeriAdresi = st.text_input("İŞYERİ ADRESİ",placeholder="İş Yeri Adresi",value=secilisatir[0].get("İŞYERİ ADRESİ") if secilisatir else None)
             PYPOgesi = st.text_input("PYP ÖĞESİ",placeholder="PYP Öğesi",value=secilisatir[0].get("PYP ÖĞESİ") if secilisatir else None)
-            AcilisTarihi = st.date_input("Açılış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("AÇILIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
-            KapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("KAPANIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
-
+            try:
+               AcilisTarihi = st.date_input("Açılış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("AÇILIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
+            except:
+               AcilisTarihi = st.date_input("Açılış Tarihi",format="DD/MM/YYYY",value=None)
+            try:
+               KapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("KAPANIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
+            except:
+               KapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=None)
             # Kullanıcı formu gönderdiğinde
             ekle = st.form_submit_button("Gönder")
             if ekle:
