@@ -3,40 +3,25 @@ from sap.main import SapGui
 import hydralit_components as hc
 from streamlit_option_menu import option_menu
 import locale
+from streamlit_extras.grid import grid
 
 locale.setlocale(locale.LC_ALL, '')
 
 st.set_page_config(layout='wide',initial_sidebar_state='collapsed',)
 
 def pa30sayfa():
-    pass
+    pa30Acıldımı = SapGui().pa30()
+    if pa30Acıldımı != "Personel ana verilerinin bkm.yap":
+        SapGui().yeniPencere()
+        SapGui().pa30()
 
 def pa40sayfa():
-    option_data = [
-    {'label':"Giriş"},
-    {'label':"PA40"},
-    {'label':"PA30"},
-    {'label':"Deneme"},
-    {'label':"PA30"}
-    ]
-    font_fmt = {'font-class':'h1','font-size':'100%'}
-    op = hc.option_bar(option_definition=option_data,key='PrimaryOption',font_styling=font_fmt,horizontal_orientation=True)
-    Durum = SapGui().acıkmı()
-    if Durum["Durum"] == "Kapalı.":
-        if op == "Giriş":
-            if st.button("Giriş"):
-                mesaj = SapGui().SapLogin()
-                st.info(mesaj)
-    
-    if op == "PA40":
-        if st.button("PA40 Deneme"):
-            mesaj = SapGui().pa40()
-            st.info(f"{mesaj[0]} adlı persınelin T.C. Kimlik Numarası: {mesaj[1]}")
-    if op == "PA30":
-        pass
+    pa40Acıldımı = SapGui().pa40()
+    if pa40Acıldımı != "Personel işlemleri dizisi":
+        SapGui().yeniPencere()
+        SapGui().pa40()
 
 def sapgirisform():
-
     uygulama = SapGui().acıkmı()
     baglanti = SapGui().baglımı()
 
@@ -80,13 +65,65 @@ def turkish_upper (text):
   }
   return text.translate (upper_map).upper ()
 
-def personelArama():
-    with st.form(key='Personelara'):
-        st.title("Personel Ara")
 
-with st.sidebar:
+
+sidebar = st.sidebar
+with sidebar:
     selected = option_menu("SAP Menü", ["SAP Giriş","PA30", 'PA40'],default_index=0)
-    if selected == "PA30":
+
+def perbilpan():
+    personelbilgileri = st.container()
+    if personelbilgileri:
+        if selected != "SAP Giriş":
+            liste = SapGui().personelBilgi()
+            with st.expander(f"{liste['İsim Soyisim']} - {liste['Personel No']} - {liste['T.C.']}",expanded=True):
+                my_grid = grid([2,2,4],5, vertical_align="top")
+                my_grid.text(body=f"{liste['Şireket']}")
+                my_grid.text(body=f"{liste['PYP']}")
+                my_grid.text(body=f"{liste['Proje Adı']}")
+                my_grid.text(body=f"{liste['Proje Kodu']}")
+                my_grid.text(body=f"{liste['istihdam']}")
+                my_grid.text(body=f"{liste['Kanun']}")
+                my_grid.text(body=f"{liste['Geçerlilik Tarihi']}")
+                my_grid.text(body=f"{liste['Yaka']}")
+
+def perislem():
+    personelislemleri = st.container()
+    if personelislemleri:
+        if selected != "SAP Giriş":
+            my_grid = grid(1,[1,1,1,1],1, vertical_align="top")
+            with open('sap\islemler.txt', 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+
+            # Satırları işle ve options_dict'i oluştur
+            options_dict = {}
+            for line in lines:
+                key, value = line.strip().split(':')
+                options_dict[key.strip(" '")] = str(value.strip(" ,\n"))
+
+            selected_value = my_grid.selectbox(label="Bilgi Tipi Metni", options=list(options_dict.keys()),on_change=None)
+            detay = my_grid.button(label="Detay",use_container_width=True)
+            sil = my_grid.button(label="Sil",use_container_width=True)
+            kopyala = my_grid.button(label="Kopyala",use_container_width=True)
+            düzenle = my_grid.button(label="Değiştir",use_container_width=True)
+            if detay:
+                tab = tablogetir(options_dict[selected_value])
+
+def tablogetir(tipno):
+    df = SapGui().detaygetir(tipno)
+    edited_df = st.data_editor(df,num_rows="fixed")
+    return edited_df
+
+if selected == "SAP Giriş":
+    sapgirisform()
+
+# st.latex(body=)
+
+if selected == "PA30":
+    pa30sayfa()
+    perbilpan()
+    perislem()
+    with sidebar:
         with st.form(key='Perara',clear_on_submit=True):
             tab1, tab2 = st.tabs(["T.C./Per.No","Ad Soyad"])
             with tab1:
@@ -108,16 +145,50 @@ with st.sidebar:
             else:
                 arananpersonel = "="+soyad+"."+ad
                 
-            aramayap = st.form_submit_button(label="Ara")
-            if aramayap:
-                SapGui().personelara(turkish_upper(arananpersonel))
+            aramayap = st.form_submit_button(label="Ara",use_container_width=True)
+            
 
-        
-if selected == "SAP Giriş":
-    sapgirisform()
+        if aramayap:
+            def bulunansecim():
+                secilen_deger = st.session_state.secilen_deger
+                aranacaksicil = secilen_deger.split(" | ")[2]
+                SapGui().personelara(aranacaksicil)
+                
+                
 
-if selected == "PA30":
-    pa30sayfa()
+            SapGui().personelara(turkish_upper(arananpersonel))
+            bulunanliste = SapGui().bulunanPersonel()
+
+            if bulunanliste.empty:
+                st.write("Hiçbir sonuç bulunamadı.")
+            else:
+                secilen_deger = st.selectbox(label="Bulunan Personeller",
+                options=bulunanliste['Ad Soyad'].astype(str) +
+                " | " + bulunanliste['T.C.'].astype(str) + " | " + bulunanliste['Personel Numarası'].astype(str) + " | "
+                + bulunanliste['Alt Alan'].astype(str) + " | " + bulunanliste['PYP'].astype(str) + " | " +
+                bulunanliste['Proje'].astype(str) + " | " + bulunanliste['Doğum Tarihi'].astype(str),
+                key='secilen_deger', index=None,on_change=bulunansecim)
 
 if selected == "PA40":
     pa40sayfa()
+    perbilpan()
+    with sidebar:
+        with st.form(key='Perara',clear_on_submit=True):
+            tab1, tab2 = st.tabs(["T.C./Per.No","Ad Soyad"])
+            with tab1:
+                arananpersonel = st.text_input (label="Personel Ara",placeholder="T.C. YADA PERSONEL NUMARASI")
+            with tab2:
+                col1, col2 = st.columns(2)
+                with col1:
+                    ad = st.text_input (label="Personel Ara",placeholder="AD")
+                with col2:
+                    soyad = st.text_input (label="",placeholder="SOYAD")
+                
+            aramayap = st.form_submit_button(label="Ara")
+            if aramayap:
+                SapGui().personelara(turkish_upper(arananpersonel))
+                bulunanliste = SapGui().bulunanPersonel()
+                st.selectbox(label="Bulunan Personeller",options=bulunanliste['Ad Soyad'].astype(str) +
+                " | " + bulunanliste['T.C.'].astype(str) + " | " + bulunanliste['Personel Numarası'].astype(str) + " | " 
+                +bulunanliste['Alt Alan'].astype(str) + " | " +bulunanliste['PYP'].astype(str) + " | " +
+                bulunanliste['Proje'].astype(str) + " | " +bulunanliste['Doğum Tarihi'].astype(str))

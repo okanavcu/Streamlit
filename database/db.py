@@ -3,7 +3,7 @@ import pandas as pd
 
 class VeriTabani:
     def __init__(self):
-        self.dizin = "database/sohm_ozluk_veri_tabani.db"
+        self.dizin = r"C:\Users\okan.avcu\Desktop\PROGRAMLAR\PYTHON\Streamlit\database\ohm_ozluk_veri_tabani.db"
         self.baglanti = None
         self.cursor = None
         self.seciliBolge = None
