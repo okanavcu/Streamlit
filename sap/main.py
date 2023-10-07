@@ -64,11 +64,6 @@ class SapGui():
         # COM altyapısını serbest bırak
         pythoncom.CoUninitialize()
 
-    def personelara(self,ara):    
-        self.session.findById("wnd[0]").maximize
-        self.session.findById("wnd[0]/usr/ctxtRP50G-PERNR").text = ara
-        self.session.findById("wnd[0]").sendVKey (0)
-
     def personelarapa40(self,ara):    
         self.session.findById("wnd[0]").maximize
         self.session.findById("wnd[0]").sendVKey(4)
@@ -176,24 +171,34 @@ class SapGui():
             else:
                 return 1
 
-    def pa40(self):
-        if self.session.ActiveWindow.text != "Personel işlemleri dizisi":
-            self.session.findById("wnd[0]/tbar[0]/okcd").text = "pa40"
-            self.session.findById("wnd[0]").sendVKey(0)
-        return self.session.ActiveWindow.text
-    
-    def pa30(self):
-        if self.session.ActiveWindow.text != "Personel ana verilerinin bkm.yap":
-            self.session.findById("wnd[0]/tbar[0]/okcd").text = "pa30"
-            self.session.findById("wnd[0]").sendVKey(0)
-        return self.session.ActiveWindow.text
-    
     def yeniPencere(self):
         self.session.createSession()
         self.session.findById("wnd[0]").maximize
         self.session.findById("wnd[0]").close()
         time.sleep(1)
 
+    def pa40(self):
+        if self.session.ActiveWindow.text != "Personel işlemleri dizisi":
+            self.session.findById("wnd[0]/tbar[0]/okcd").text = "pa40"
+            self.session.findById("wnd[0]").sendVKey(0)
+        return self.session.ActiveWindow.text
+    
+    def pa30Ac(self):
+            self.session.findById("wnd[0]/tbar[0]/okcd").text = "pa30"
+            self.session.findById("wnd[0]").sendVKey(0)
+
+    def pa30(self):
+        try:
+            if self.session.ActiveWindow.text != "Personel ana verilerinin bkm.yap":
+                if self.session.ActiveWindow.SystemFocus.Id == "/app/con[0]/ses[0]/wnd[0]/usr/ctxtRP50G-PERNR" or self.session.ActiveWindow.SystemFocus.Id == "/app/con[0]/ses[1]/wnd[0]/usr/ctxtRP50G-PERNR":
+                    self.yeniPencere()
+                    self.pa30Ac()
+        except:
+            if self.session.ActiveWindow.text != "Personel ana verilerinin bkm.yap":
+                self.pa30Ac()
+    
+    
+    
     def bulunanPersonel(self):
         personeller ={"Personel Numarası":[],"Ad Soyad":[],"T.C.":[],"Doğum Tarihi":[],"Alt Alan":[],"PYP":[],"Proje":[]}
         
@@ -285,7 +290,16 @@ class SapGui():
             df[columns[i]] = column_data
         return df
 
+    def text(self):
+        print(self.session.ActiveWindow.SystemFocus.Id)
+
+    def personelara(self,ara):
+        self.session.findById("wnd[0]").maximize
+        self.session.findById("wnd[0]/usr/ctxtRP50G-PERNR").text = ara
+        self.session.findById("wnd[0]").sendVKey (0)
 
 if __name__ == "__main__":
     a = SapGui()
-    a.detaygetir("0000")
+    a.text()
+
+    #/app/con[0]/ses[0]/wnd[0]/usr/ctxtRP50G-PERNR

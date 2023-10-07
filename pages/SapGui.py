@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from sap.main import SapGui
 import hydralit_components as hc
@@ -7,19 +8,24 @@ from streamlit_extras.grid import grid
 
 locale.setlocale(locale.LC_ALL, '')
 
+
+
 st.set_page_config(layout='wide',initial_sidebar_state='collapsed',)
 
+
+def clear():
+    st.cache_resource.clear()
+
 def pa30sayfa():
-    pa30Acıldımı = SapGui().pa30()
-    if pa30Acıldımı != "Personel ana verilerinin bkm.yap":
-        SapGui().yeniPencere()
-        SapGui().pa30()
+    SapGui().pa30()
+
 
 def pa40sayfa():
     pa40Acıldımı = SapGui().pa40()
     if pa40Acıldımı != "Personel işlemleri dizisi":
         SapGui().yeniPencere()
         SapGui().pa40()
+
 
 def sapgirisform():
     uygulama = SapGui().acıkmı()
@@ -64,9 +70,6 @@ def turkish_upper (text):
     ord (u'i'): u'İ',
   }
   return text.translate (upper_map).upper ()
-
-
-
 sidebar = st.sidebar
 with sidebar:
     selected = option_menu("SAP Menü", ["SAP Giriş","PA30", 'PA40'],default_index=0)
@@ -92,32 +95,32 @@ def perislem():
     if personelislemleri:
         if selected != "SAP Giriş":
             my_grid = grid(1,[1,1,1,1],1, vertical_align="top")
-            with open('sap\islemler.txt', 'r', encoding='utf-8') as file:
+            with open(r'C:\Users\okan.avcu\Desktop\PROGRAMLAR\PYTHON\Streamlit\sap\islemler.txt', 'r', encoding='utf-8') as file:
                 lines = file.readlines()
 
-            # Satırları işle ve options_dict'i oluştur
             options_dict = {}
             for line in lines:
                 key, value = line.strip().split(':')
                 options_dict[key.strip(" '")] = str(value.strip(" ,\n"))
 
-            selected_value = my_grid.selectbox(label="Bilgi Tipi Metni", options=list(options_dict.keys()),on_change=None)
+            selected_value = my_grid.selectbox(label="Bilgi Tipi Metni", options=list(options_dict.keys()),on_change=None,index=None)
             detay = my_grid.button(label="Detay",use_container_width=True)
             sil = my_grid.button(label="Sil",use_container_width=True)
             kopyala = my_grid.button(label="Kopyala",use_container_width=True)
             düzenle = my_grid.button(label="Değiştir",use_container_width=True)
             if detay:
-                tab = tablogetir(options_dict[selected_value])
+                df = tablogetir(options_dict[selected_value])
+                df.insert(0,"Seç",0)
+                st.data_editor(df,column_config={"Seç": st.column_config.CheckboxColumn(label="Seç",default=False,)},hide_index=True,)
+
 
 def tablogetir(tipno):
     df = SapGui().detaygetir(tipno)
-    edited_df = st.data_editor(df,num_rows="fixed")
-    return edited_df
+    return df
 
 if selected == "SAP Giriş":
     sapgirisform()
 
-# st.latex(body=)
 
 if selected == "PA30":
     pa30sayfa()
@@ -145,17 +148,15 @@ if selected == "PA30":
             else:
                 arananpersonel = "="+soyad+"."+ad
                 
-            aramayap = st.form_submit_button(label="Ara",use_container_width=True)
+            aramayap = st.form_submit_button(label="Ara",use_container_width=True,on_click=None)
             
 
         if aramayap:
             def bulunansecim():
                 secilen_deger = st.session_state.secilen_deger
                 aranacaksicil = secilen_deger.split(" | ")[2]
-                SapGui().personelara(aranacaksicil)
+                SapGui().personelara(aranacaksicil)                
                 
-                
-
             SapGui().personelara(turkish_upper(arananpersonel))
             bulunanliste = SapGui().bulunanPersonel()
 
@@ -192,3 +193,4 @@ if selected == "PA40":
                 " | " + bulunanliste['T.C.'].astype(str) + " | " + bulunanliste['Personel Numarası'].astype(str) + " | " 
                 +bulunanliste['Alt Alan'].astype(str) + " | " +bulunanliste['PYP'].astype(str) + " | " +
                 bulunanliste['Proje'].astype(str) + " | " +bulunanliste['Doğum Tarihi'].astype(str))
+
