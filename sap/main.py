@@ -65,7 +65,7 @@ class SapGui():
         pythoncom.CoUninitialize()
 
     def personelarapa40(self,ara):    
-        self.session.findById("wnd[0]").maximize
+        self.session.findById("wnd[0]").maximize()
         self.session.findById("wnd[0]").sendVKey(4)
         self.session.findById("wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB005/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG_SELFLD_TAB-LOW[0,24]").text = "avcu"
         self.session.findById("wnd[1]/usr/tabsG_SELONETABSTRIP/tabpTAB005/ssubSUBSCR_PRESEL:SAPLSDH4:0220/sub:SAPLSDH4:0220/txtG_SELFLD_TAB-LOW[1,24]").text = "okan"
@@ -173,9 +173,10 @@ class SapGui():
 
     def yeniPencere(self):
         self.session.createSession()
-        self.session.findById("wnd[0]").maximize
+        self.session.findById("wnd[0]").maximize()
         self.session.findById("wnd[0]").close()
         time.sleep(1)
+        self.session = self.connection.Children(0)
 
     def pa40(self):
         if self.session.ActiveWindow.text != "Personel işlemleri dizisi":
@@ -189,14 +190,16 @@ class SapGui():
 
     def pa30(self):
         try:
-            if self.session.ActiveWindow.text != "Personel ana verilerinin bkm.yap":
-                if self.session.ActiveWindow.SystemFocus.Id == "/app/con[0]/ses[0]/wnd[0]/usr/ctxtRP50G-PERNR" or self.session.ActiveWindow.SystemFocus.Id == "/app/con[0]/ses[1]/wnd[0]/usr/ctxtRP50G-PERNR":
-                    self.yeniPencere()
+            while "Personel ana verilerinin bkm.yap" != self.session.ActiveWindow.text:
+                if self.session.ActiveWindow.SystemFocus:
+                    self.session.findById("wnd[0]/tbar[0]/btn[3]").press()
+                    if "Yürl.ekrandan çıkış" == self.session.ActiveWindow.text:
+                        self.session.findById("wnd[1]/usr/btnSPOP-OPTION1").press()
+                else:
                     self.pa30Ac()
         except:
-            if self.session.ActiveWindow.text != "Personel ana verilerinin bkm.yap":
-                self.pa30Ac()
-    
+            self.yeniPencere()
+            self.pa30Ac()
     
     
     def bulunanPersonel(self):
@@ -230,7 +233,7 @@ class SapGui():
     def personelBilgi(self):
         try:
             pyp=""
-            self.session.findById("wnd[0]").maximize
+            self.session.findById("wnd[0]").maximize()
             ad = self.session.findById("wnd[0]/usr/subSUBSCR_HEADER:/1PAPAXX/HDR_20047A:0100/txt$_DG01_200A47_DAT_P0001_ENAME").text
             istihdam = self.session.findById("wnd[0]/usr/subSUBSCR_HEADER:/1PAPAXX/HDR_20047A:0100/txt$_DG03_200A47_DTX_P0000_STAT2").text
             kanun = self.session.findById("wnd[0]/usr/subSUBSCR_HEADER:/1PAPAXX/HDR_20047A:0100/txt$_DG08_200A47_DTX_P0001_PERSG").text
@@ -293,13 +296,113 @@ class SapGui():
     def text(self):
         print(self.session.ActiveWindow.SystemFocus.Id)
 
+    def islemTabloSecim(self,typno,satir):
+        self.session.findById(f"wnd[0]/usr/tblMP{typno}00TC3000").getAbsoluteRow(satir).selected = True
+
+    def islemTabloSecimPa40(self,satir:int,tarih:str):
+        self.session.findById("wnd[0]/usr/ctxtRP50G-EINDA").text = tarih.strftime("%d.%m.%Y")
+        self.session.findById("wnd[0]/usr/tblSAPMP50ATC_MENU_EVENT").getAbsoluteRow(satir).selected = True
+        # self.session.findById("wnd[0]/tbar[1]/btn[8]").press()
+
+    def istenayrılma(self,neden:int):
+        self.session.findById("wnd[0]/tbar[1]/btn[8]").press()
+        self.session.findById("wnd[0]/usr/ctxtP0000-MASSG").text = neden
+        self.session.findById("wnd[0]").sendVKey (11)
+        try:
+            while True:
+
+                if self.session.ActiveWindow.text =="Bilgi":
+                    self.session.findById("wnd[1]/tbar[0]/btn[0]").press()
+                    self.session.findById("wnd[0]").sendVKey(0)
+
+                if self.session.ActiveWindow.text == "Organizasyonel tayin kopyala":
+                    self.session.findById("wnd[0]").sendVKey (11)
+                    self.session.findById("wnd[0]").sendVKey(0)
+                    if self.session.ActiveWindow.text == "Organizasyonel tayin kopyala":
+                        self.session.findById("wnd[0]").sendVKey(0)
+
+                if self.session.ActiveWindow.text == "Temel ödemeler Sınırla":
+                    for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
+                        self.session.findById("wnd[0]/usr/tblMP000800TC3000").getAbsoluteRow(i).selected = True
+                    self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
+                
+                if self.session.ActiveWindow.text == "Ek alanlar (TR) Sınırla":
+                    for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
+                        self.session.findById("wnd[0]/usr/tblMP077100TC3000").getAbsoluteRow(i).selected = True
+                    self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
+
+                if self.session.ActiveWindow.text == "Tarih verileri Sınırla":
+                    for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
+                        self.session.findById("wnd[0]/usr/tblMP004100TC3000").getAbsoluteRow(i).selected = True
+                    self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
+                
+                if self.session.ActiveWindow.text == "Masraf Sınırla":
+                    for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
+                        self.session.findById("wnd[0]/usr/tblMP002700TC3000").getAbsoluteRow(i).selected = True
+                    self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
+
+                if self.session.ActiveWindow.text == "Masraf dağıtımı Sınırla":
+                    for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
+                        self.session.findById("wnd[0]/usr/tblMP002700TC3000").getAbsoluteRow(i).selected = True
+                    self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
+
+                if self.session.ActiveWindow.text == "Sözleşme bileşenleri Sınırla":
+                    for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
+                        self.session.findById("wnd[0]/usr/tblMP001600TC3000").getAbsoluteRow(i).selected = True
+                    self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
+
+                if self.session.ActiveWindow.text == """Bilgi tipi "Kıdem & İhbar  Bilgileri"  için alt tipler 4 Girişler""":
+                    self.session.findById("wnd[0]").sendVKey (0) 
+
+                if self.session.ActiveWindow.text == "Kıdem & İhbar Bilgileri değiştir":
+                    self.session.findById("wnd[0]").sendVKey (11)
+                    break
+        except:
+            pass
+
+    def pa30_Kopyala(self):
+        self.session.findById("wnd[0]/tbar[1]/btn[21]").press()
+
+    def pa30_Düzenle(self):
+        self.session.findById("wnd[0]/tbar[1]/btn[6]").press()
+
+    def pa30_sil(self):
+        self.session.findById("wnd[0]/tbar[1]/btn[14]").press()
+    
+
+    def ekranBilgileri(self):
+        elementSay =self.session.findById("wnd[0]/usr").Children.Count
+        aktifElement = {"Başlık" : [],"Id" :[], "Value" :[]}
+        for i in range(elementSay):
+            child = self.session.findById(f"wnd[0]/usr").Children.Item(i)
+            if child.Changeable == True and child.DefaultTooltip != "":
+                aktifElement["Başlık"].append(child.DefaultTooltip)
+                id_string = child.id
+                slashes = []
+                for i in range(len(id_string)):
+                    if id_string[i] == "/":
+                        slashes.append(i)
+                first_four = slashes[:4]
+                cut_index = first_four[-1] + 1
+                new_id = id_string[cut_index:]
+                aktifElement["Id"].append(new_id)
+                aktifElement["Value"].append(child.text)
+        return aktifElement
+
+    def kaydet(self,**kwargs):
+
+        for key, value in kwargs.items():
+            try:
+                self.session.findById(f"{key}").text = str(value)
+            except:
+                pass
+
     def personelara(self,ara):
-        self.session.findById("wnd[0]").maximize
+        self.session.findById("wnd[0]").maximize()
         self.session.findById("wnd[0]/usr/ctxtRP50G-PERNR").text = ara
         self.session.findById("wnd[0]").sendVKey (0)
+        
 
 if __name__ == "__main__":
     a = SapGui()
-    a.text()
-
-    #/app/con[0]/ses[0]/wnd[0]/usr/ctxtRP50G-PERNR
+    a.istenayrılma("03")
