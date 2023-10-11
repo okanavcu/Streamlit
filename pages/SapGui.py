@@ -74,6 +74,7 @@ def turkish_upper (text):
     ord (u'i'): u'İ',
     }
     return text.translate (upper_map).upper ()
+
 sidebar = st.sidebar
 with sidebar:
     selected = option_menu("SAP Menü", ["SAP Giriş","PA30", 'PA40'],default_index=0)

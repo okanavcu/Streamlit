@@ -203,6 +203,11 @@ class SapGui():
     
     
     def bulunanPersonel(self):
+        if  "Bu seçim için değer yok" == self.session.findById("wnd[0]/sbar").text:
+                    self.session.findById("wnd[1]").close()
+                    self.session.findById("wnd[0]/usr/ctxtRP50G-PERNR").text = ""
+                    self.session.findById("wnd[0]").sendVKey (0)
+                    
         personeller ={"Personel Numarası":[],"Ad Soyad":[],"T.C.":[],"Doğum Tarihi":[],"Alt Alan":[],"PYP":[],"Proje":[]}
         
         try:
@@ -299,6 +304,9 @@ class SapGui():
     def islemTabloSecim(self,typno,satir):
         self.session.findById(f"wnd[0]/usr/tblMP{typno}00TC3000").getAbsoluteRow(satir).selected = True
 
+
+################################# P40 İŞLEMLERİ #####################################################
+
     def islemTabloSecimPa40(self,satir:int,tarih:str):
         self.session.findById("wnd[0]/usr/ctxtRP50G-EINDA").text = tarih.strftime("%d.%m.%Y")
         self.session.findById("wnd[0]/usr/tblSAPMP50ATC_MENU_EVENT").getAbsoluteRow(satir).selected = True
@@ -313,6 +321,10 @@ class SapGui():
 
                 if self.session.ActiveWindow.text =="Bilgi":
                     self.session.findById("wnd[1]/tbar[0]/btn[0]").press()
+                    self.session.findById("wnd[0]").sendVKey(0)
+                
+                if self.session.ActiveWindow.text == "İşlemler dizisi kopyala":
+                    self.session.findById("wnd[0]").sendVKey (11)
                     self.session.findById("wnd[0]").sendVKey(0)
 
                 if self.session.ActiveWindow.text == "Organizasyonel tayin kopyala":
@@ -345,10 +357,15 @@ class SapGui():
                     for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
                         self.session.findById("wnd[0]/usr/tblMP002700TC3000").getAbsoluteRow(i).selected = True
                     self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
-
+                
                 if self.session.ActiveWindow.text == "Sözleşme bileşenleri Sınırla":
                     for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
                         self.session.findById("wnd[0]/usr/tblMP001600TC3000").getAbsoluteRow(i).selected = True
+                    self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
+
+                if self.session.ActiveWindow.text == "Yinelenen ödemeler/kesintiler Sınırla":
+                    for i in range(int(self.session.findById("wnd[0]/usr/txtRP50M-PAGEA").text)):
+                        self.session.findById("wnd[0]/usr/tblMP001400TC3000").getAbsoluteRow(i).selected = True
                     self.session.findById("wnd[0]/tbar[1]/btn[13]").press()
 
                 if self.session.ActiveWindow.text == """Bilgi tipi "Kıdem & İhbar  Bilgileri"  için alt tipler 4 Girişler""":
@@ -357,10 +374,64 @@ class SapGui():
                 if self.session.ActiveWindow.text == "Kıdem & İhbar Bilgileri değiştir":
                     self.session.findById("wnd[0]").sendVKey (11)
                     break
+
+                if self.session.ActiveWindow.text == "Kıdem & İhbar Bilgileri yarat":
+                    self.session.findById("wnd[0]/tbar[1]/btn[19]").press()
+                    break
         except:
             pass
 
+    # def orgaizasyonelDegisiklik(self,neden:int,):
+    #     self.session.findById("wnd[0]/usr/ctxtP0000-MASSG").text = "01"
+    #     self.session.findById("wnd[0]/usr/ctxtPSPAR-PERSK").text = "07"
+    #     self.session.findById("wnd[0]/usr/ctxtP0000-MASSG").setFocus
+    #     self.session.findById("wnd[0]/usr/ctxtP0000-MASSG").caretPosition = 1
+    #     self.session.findById("wnd[0]").sendVKey 4
+    #     self.session.findById("wnd[1]").close
+    #     self.session.findById("wnd[0]/tbar[0]/btn[11]").press
+    #     self.session.findById("wnd[0]").sendVKey 0
+    #     self.session.findById("wnd[0]/usr/ctxtP0001-BTRTL").text = "D300"
+    #     self.session.findById("wnd[0]/usr/ctxtP0001-VDSK1").text = "D300"
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_T582C:ZP000100:0200/ctxtP0001-ZZPYP").text = "242.002"
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_T582C:ZP000100:0200/ctxtP0001-ZZPYP").setFocus
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_T582C:ZP000100:0200/ctxtP0001-ZZPYP").caretPosition = 7
+    #     self.session.findById("wnd[0]").sendVKey 11
+    #     self.session.findById("wnd[0]").sendVKey 0
+    #     self.session.findById("wnd[0]").sendVKey 11
+    #     self.session.findById("wnd[0]").sendVKey 0
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_TC0008:MP000800:0300/tblMP000800TC/ctxtQ0008-LGART[0,0]").setFocus
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_TC0008:MP000800:0300/tblMP000800TC/ctxtQ0008-LGART[0,0]").caretPosition = 3
+    #     self.session.findById("wnd[0]").sendVKey 4
+    #     self.session.findById("wnd[1]/usr/lbl[10,3]").setFocus
+    #     self.session.findById("wnd[1]/usr/lbl[10,3]").caretPosition = 11
+    #     self.session.findById("wnd[1]").sendVKey 2
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_TC0008:MP000800:0300/tblMP000800TC/ctxtQ0008-LGART[0,0]").text = "1000"
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_TC0008:MP000800:0300/tblMP000800TC/txtQ0008-BETRG[3,0]").text = "15380,26"
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_TC0008:MP000800:0300/tblMP000800TC/txtQ0008-BETRG[3,0]").setFocus
+    #     self.session.findById("wnd[0]/usr/subSUBSCREEN_TC0008:MP000800:0300/tblMP000800TC/txtQ0008-BETRG[3,0]").caretPosition = 18
+    #     self.session.findById("wnd[0]/tbar[0]/btn[11]").press
+    #     self.session.findById("wnd[0]").sendVKey 0
+    #     self.session.findById("wnd[0]/tbar[0]/btn[11]").press
+    #     self.session.findById("wnd[0]").sendVKey 0
+    #     self.session.findById("wnd[0]/tbar[1]/btn[19]").press
+    #     self.session.findById("wnd[0]/tbar[0]/btn[11]").press
+    #     self.session.findById("wnd[0]").sendVKey 0
+    #     self.session.findById("wnd[0]/tbar[0]/btn[11]").press
+    #     self.session.findById("wnd[1]").sendVKey 0
+    #     self.session.findById("wnd[0]/usr/tblMP001400TC3000").getAbsoluteRow(0).selected = true
+    #     self.session.findById("wnd[0]/usr/tblMP001400TC3000/ctxtP0014-LGART[0,0]").setFocus
+    #     self.session.findById("wnd[0]/usr/tblMP001400TC3000/ctxtP0014-LGART[0,0]").caretPosition = 0
+    #     self.session.findById("wnd[0]/tbar[1]/btn[13]").press
+    #     self.session.findById("wnd[0]/usr/ctxtP0771-MSLKS").text = "5414.11"
+    #     self.session.findById("wnd[0]/usr/ctxtP0771-MSLKS").setFocus
+    #     self.session.findById("wnd[0]/usr/ctxtP0771-MSLKS").caretPosition = 7
+    #     self.session.findById("wnd[0]/tbar[0]/btn[11]").press
+    #     self.session.findById("wnd[1]/tbar[0]/btn[0]").press
+    #     self.session.findById("wnd[0]/tbar[0]/btn[11]").press
+    #     self.session.findById("wnd[1]/tbar[0]/btn[0]").press
+###########################################################################################################################################
     def pa30_Kopyala(self):
+        
         self.session.findById("wnd[0]/tbar[1]/btn[21]").press()
 
     def pa30_Düzenle(self):
@@ -405,4 +476,4 @@ class SapGui():
 
 if __name__ == "__main__":
     a = SapGui()
-    a.istenayrılma("03")
+    a.pa30()
