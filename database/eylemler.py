@@ -53,6 +53,7 @@ class Eylemler:
             session = Session(bind=engine)
             bölge_listesi = cls.Kullanici_sorgu().BolgeId
             if type(bölge_listesi) == str:
+
                 bolgeliste = [int(x) for x in bölge_listesi.split(",")]
             else:
                 bolgeliste = [0,bölge_listesi]
