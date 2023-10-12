@@ -106,7 +106,7 @@ class SapGui():
                 try:
                     assert self.connection
                 except:
-                    self.connection = self.application.OpenConnection("ERP_LOGON_GRUP", True)
+                    self.connection = self.application.OpenConnection("SAP HANA CANLI", True)
                     if not type(self.connection) == win32com.client.CDispatch:
                         self.application = None
                         self.SapGuiAuto = None

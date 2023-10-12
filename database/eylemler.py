@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine,func
 
-engine = create_engine("sqlite:///C:/Users/okan.avcu/Desktop/PROGRAMLAR/PYTHON/Streamlit/database/ohm_ozluk_veri_tabani.db")
+engine = create_engine("sqlite:///C:/Users/oavcu/Uygulamalar/Streamlit/database/ohm_ozluk_veri_tabani.db")
 
 class Eylemler:
 

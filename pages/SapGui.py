@@ -103,7 +103,7 @@ def perislem():
     personelislemleriEkran = st.container()
     with personelislemleri:
         if selected != "SAP Giriş":
-            with open(r'C:\Users\okan.avcu\Desktop\PROGRAMLAR\PYTHON\Streamlit\sap\islemler.txt', 'r', encoding='utf-8') as file:
+            with open(r'sap\islemler.txt', 'r', encoding='utf-8') as file:
                 lines = file.readlines()
 
             options_dict = {}
@@ -269,7 +269,7 @@ def perislem40():
             ckcfrm = st.form(key='ckcfrm',clear_on_submit=True)
             with ckcfrm:
                 if secilen_secenek== "İşten ayrılma":
-                    with open(r'C:\Users\okan.avcu\Desktop\PROGRAMLAR\PYTHON\Streamlit\sap\çıkışnedenleri.txt', 'r', encoding='utf-8') as file:
+                    with open(r'sap\çıkışnedenleri.txt', 'r', encoding='utf-8') as file:
                             lines = file.readlines()
                     options_dict = {}
                     for line in lines:
