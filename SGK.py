@@ -146,8 +146,8 @@ if op == "Şifre Paneli":
       update_mode=GridUpdateMode.SELECTION_CHANGED,
       columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
       allow_unsafe_jscode=True,
-      enable_quicksearch=True,
-   )
+      enable_quicksearch=True,)
+
 
    secilisatir = tablo["selected_rows"]
 
