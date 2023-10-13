@@ -15,7 +15,7 @@ class Kullanicilar(Base):
     SirketId:Mapped[str] = mapped_column(nullable=False)
     BolgeId:Mapped[str] = mapped_column(nullable=False)
     KullaniciAdi:Mapped[str] = mapped_column(unique=True)
-    Mail:Mapped[int] = mapped_column()
+    Mail:Mapped[str] = mapped_column()
     Admin:Mapped[bool] = mapped_column()
     
 

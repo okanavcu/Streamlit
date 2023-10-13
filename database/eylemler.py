@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine,func
 
-engine = create_engine("sqlite:///C:/Users/oavcu/Uygulamalar/Streamlit/database/ohm_ozluk_veri_tabani.db")
+engine = create_engine("sqlite:///database/ohm_ozluk_veri_tabani.db")
 
 class Eylemler:
 
@@ -114,7 +114,7 @@ class Eylemler:
             session = Session(bind=engine)
             Isyeri = session.query(Isyerleri).filter(Isyerleri.SGKSicilNo == formdegeri['SGKSicilNo']).first()
             Isyerisicil = Isyeri.SGKSicilNo if Isyeri else None
-            bolge = session.query(Bolgeler).filter(Bolgeler.bolge == formdegeri["Bolge"]).first()
+            bolge = session.query(Bolgeler).filter(Bolgeler.bolge == formdegeri["bolge"]).first()
             BolgeId = bolge.id if bolge else None
             sirket = session.query(Sirketler).filter(Sirketler.SirketKodu == formdegeri["SirketKodu"]).first()
             SirketId = sirket.id if sirket else None
@@ -249,3 +249,4 @@ class Eylemler:
             print(e)
         finally:
             session.close()
+

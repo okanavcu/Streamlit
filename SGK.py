@@ -178,27 +178,74 @@ if op == "Şifre Paneli":
             except:
                KapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=None)
             # Kullanıcı formu gönderdiğinde
-            ekle = st.form_submit_button("Gönder")
-            if ekle:
-               form_data = {  "SirketKodu": SirketId,
-                              "bolge": BolgeId,
-                              "SAPKodu": SAPKodu,
-                              "IsYeriAdi": IsYeriAdi,
-                              "KullaniciAdi": KullaniciAdi,
-                              "KullaniciKodu": KullaniciKodu,
-                              "SistemSifresi": SistemSifresi,
-                              "IsYeriSifresi": IsYeriSifresi,
-                              "SGKSicilNo": SGKSicilNo,
-                              "IsYeriAdresi": IsYeriAdresi,
-                              "PYPOgesi": PYPOgesi,
-                              "AcilişTarihi": AcilisTarihi.strftime("%d.%m.%Y"),
-                              "KapanisTarihi": KapanisTarihi.strftime("%d.%m.%Y"),
-                           }
-               Eylemler.guncelle(form_data)
-               st.cache_data.clear()
-               st.toast(body=(f"{PYPOgesi} {SAPKodu} {IsYeriAdi} GÜNCELLENDİ."))
-               time.sleep(3)
-               st.rerun()
+            col1,col2,col3 = st.columns(3)
+            with col1:
+               Ekle = st.form_submit_button("Ekle",use_container_width=True)
+               if Ekle:
+                  form_data = {  "SirketKodu": SirketId,
+                                 "bolge": BolgeId,
+                                 "SAPKodu": SAPKodu,
+                                 "IsYeriAdi": IsYeriAdi,
+                                 "KullaniciAdi": KullaniciAdi,
+                                 "KullaniciKodu": KullaniciKodu,
+                                 "SistemSifresi": SistemSifresi,
+                                 "IsYeriSifresi": IsYeriSifresi,
+                                 "SGKSicilNo": SGKSicilNo,
+                                 "IsYeriAdresi": IsYeriAdresi,
+                                 "PYPOgesi": PYPOgesi,
+                                 "AcilişTarihi": AcilisTarihi.strftime("%d.%m.%Y")if AcilisTarihi else None,
+                                 "KapanisTarihi": KapanisTarihi.strftime("%d.%m.%Y")if KapanisTarihi else None,
+                              }
+                  Eylemler.ekle(form_data)
+                  st.cache_data.clear()
+                  st.toast(body=(f"{PYPOgesi} {SAPKodu} {IsYeriAdi} Eklendi."))
+                  time.sleep(3)
+                  st.rerun()
+            with col2:
+               guncelle = st.form_submit_button("Güncelle",use_container_width=True)
+               if guncelle:
+                  form_data = {  "SirketKodu": SirketId,
+                                 "bolge": BolgeId,
+                                 "SAPKodu": SAPKodu,
+                                 "IsYeriAdi": IsYeriAdi,
+                                 "KullaniciAdi": KullaniciAdi,
+                                 "KullaniciKodu": KullaniciKodu,
+                                 "SistemSifresi": SistemSifresi,
+                                 "IsYeriSifresi": IsYeriSifresi,
+                                 "SGKSicilNo": SGKSicilNo,
+                                 "IsYeriAdresi": IsYeriAdresi,
+                                 "PYPOgesi": PYPOgesi,
+                                 "AcilişTarihi": AcilisTarihi.strftime("%d.%m.%Y")if AcilisTarihi else None,
+                                 "KapanisTarihi": KapanisTarihi.strftime("%d.%m.%Y")if KapanisTarihi else None,
+                              }
+                  Eylemler.guncelle(form_data)
+                  st.cache_data.clear()
+                  st.toast(body=(f"{PYPOgesi} {SAPKodu} {IsYeriAdi} GÜNCELLENDİ."))
+                  time.sleep(3)
+                  st.rerun()
+            
+            with col3:
+               Sil = st.form_submit_button("Sil",use_container_width=True)
+               if Sil:
+                  form_data = {  "SirketKodu": SirketId,
+                                 "bolge": BolgeId,
+                                 "SAPKodu": SAPKodu,
+                                 "IsYeriAdi": IsYeriAdi,
+                                 "KullaniciAdi": KullaniciAdi,
+                                 "KullaniciKodu": KullaniciKodu,
+                                 "SistemSifresi": SistemSifresi,
+                                 "IsYeriSifresi": IsYeriSifresi,
+                                 "SGKSicilNo": SGKSicilNo,
+                                 "IsYeriAdresi": IsYeriAdresi,
+                                 "PYPOgesi": PYPOgesi,
+                                 "AcilişTarihi": AcilisTarihi.strftime("%d.%m.%Y")if AcilisTarihi else None,
+                                 "KapanisTarihi": KapanisTarihi.strftime("%d.%m.%Y")if KapanisTarihi else None,
+                              }
+                  Eylemler.sil(form_data)
+                  st.cache_data.clear()
+                  st.toast(body=(f"{PYPOgesi} {SAPKodu} {IsYeriAdi} SİLİNDİ."))
+                  time.sleep(3)
+                  st.rerun()
 
 if op == "SGK Sistem":
    with st.form("SGKSistem"):
