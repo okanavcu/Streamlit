@@ -1,3 +1,4 @@
+import sys
 import time
 import streamlit as st
 import hydralit_components as hc
@@ -276,4 +277,5 @@ else:
       if submitted:
          # Değerleri mail fonksiyonuna geçir
          mail(kullanici_adi, secilen_sirketler, secilen_bolge)
+         st.cache_data.clear
 
