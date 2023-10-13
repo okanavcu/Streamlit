@@ -1,8 +1,11 @@
+import sys
+from win32com.client import Dispatch
 from .model import Base, Kullanicilar,Isyerleri,Bolgeler,Sirketler,Projeler
 import getpass
 import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine,func
+import pythoncom
 
 engine = create_engine("sqlite:///database/ohm_ozluk_veri_tabani.db")
 
@@ -17,10 +20,7 @@ class Eylemler:
         try:
             session = Session(bind=engine)
             kullanici_adi = getpass.getuser()
-
             query = session.query(Kullanicilar).filter(Kullanicilar.KullaniciAdi == kullanici_adi)
-
-            # Sorguyu çalıştırma ve sonuçları alıp kullanma
             results = query.first()
             if results:
                 pass
@@ -36,7 +36,6 @@ class Eylemler:
             session = Session(bind=engine)
             kullanici_adi = getpass.getuser()
             query = session.query(Kullanicilar).filter(Kullanicilar.KullaniciAdi == kullanici_adi, Kullanicilar.Admin == True)
-            # Sorguyu çalıştırma ve sonuçları alıp kullanma
             result = query.first()
             if result:
                 return result
@@ -45,6 +44,30 @@ class Eylemler:
         except Exception as e:
             return "Bağlantı Yok"
         finally:
+            session.close()
+
+    @classmethod
+    def sirketliste(cls):
+        try:
+            session = Session(bind=engine)
+            sirketler = session.query(Sirketler).all()
+            sirket_listesi = [s.SirketAdi for s in sirketler]
+            return sirket_listesi
+        except:
+            pass
+        finally :
+            session.close()
+
+    @classmethod
+    def bolgeliste(cls):
+        try:
+            session = Session(bind=engine)
+            bolgeler = session.query(Bolgeler).all()
+            bolge_listesi = [s.bolge for s in bolgeler]
+            return bolge_listesi
+        except:
+            pass
+        finally :
             session.close()
 
     @classmethod
@@ -250,3 +273,26 @@ class Eylemler:
         finally:
             session.close()
 
+
+def mail(kullaniciadi, sirketkodlari, bolgekodlari):
+
+    pythoncom.CoInitialize()
+    outlook = Dispatch('Outlook.Application')
+    mail = outlook.CreateItem(0)
+    mail.Importance = 2
+    mail.To = "oavcu@bilkentohm.com.tr"
+    mail.Subject = "SGK SİSTEM UYGULAMASI KULLANICI KAYDI HK."
+    
+    # E-posta gövdesi için f-string kullanarak hazırlayın
+    html_body = f"""
+                <br><strong>Sn. İlgili,</strong></br><br></br>
+                <br>SGK Sistem uygulamasına kullanıcı kaydımın yapılmaısı konusunda desteklerinizi beklerim.</br><br></br>
+                <br>PC Kullanıcı Adı: {kullaniciadi}</br>
+                <br>Şirket Kodu: {sirketkodlari}</br>
+                <br>Bölge: {bolgekodlari}</br>
+                <p>İyi çalışmalar dilerim.</p>
+                """   
+    mail.HTMLBody = html_body
+    mail.Send()
+    pythoncom.CoUninitialize()
+    sys.exit()
