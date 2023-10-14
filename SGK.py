@@ -277,5 +277,6 @@ else:
       if submitted:
          # Değerleri mail fonksiyonuna geçir
          mail(kullanici_adi, secilen_sirketler, secilen_bolge)
-         st.cache_data.clear
+         st.cache_data.clear()
+         st.rerun()
 

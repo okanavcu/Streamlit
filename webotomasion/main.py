@@ -31,7 +31,7 @@ class SeleniumSgk:
         return self.driver
     
     def ocr(self):
-        pytesseract.pytesseract.tesseract_cmd = f"C:/Users/{kullanici_adi}/AppData/Local/Programs/Tesseract-OCR/tesseract.exe"
+        pytesseract.pytesseract.tesseract_cmd = r"Tesseract-OCR\tesseract.exe"
         resim = cv2.imread(r"captcha.png")
         metin = pytesseract.image_to_string(resim)
         return metin
@@ -54,7 +54,7 @@ class SeleniumSgk:
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_kod").send_keys(kullaniciKodu)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_password").send_keys(sistemSifresi)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_sifre").send_keys(isyeriSifresi)
-        driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
+        # driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
 
     def isKazasi(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
@@ -82,7 +82,7 @@ class SeleniumSgk:
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_kod").send_keys(kullaniciKodu)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_password").send_keys(sistemSifresi)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_sifre").send_keys(isyeriSifresi)
-        driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
+        # driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
         
     def topluGiris(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
