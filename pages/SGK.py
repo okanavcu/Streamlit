@@ -1,89 +1,83 @@
 import time
 import streamlit as st
 import hydralit_components as hc
-from database.eylemler import Eylemler
+from streamlit_extras.switch_page_button import switch_page
+from database.supabaseConnect import Eylemler
 from st_aggrid import AgGrid,GridUpdateMode,ColumnsAutoSizeMode,DataReturnMode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from datetime import datetime
 from webotomasion.main import SeleniumSgk
 
+st.set_page_config(layout='wide',initial_sidebar_state='collapsed')
 
-
-st.set_page_config(layout='wide',initial_sidebar_state='collapsed',)
-
+with st.sidebar:
+   cıkısButon = st.button("Çıkış Yap",key="cikis")
+   if cıkısButon:
+      session = Eylemler.cıkıs()
+      st.session_state.session = None
+      st.cache_data.clear()
+      switch_page("anasayfa")
 option_data = [
    {'label':"SGK Sistem"},
    {'label':"Şifre Paneli"},
 ]
-
 font_fmt = {'font-class':'h1','font-size':'100%'}
-
 op = hc.option_bar(option_definition=option_data,key='PrimaryOption',font_styling=font_fmt,horizontal_orientation=True)
 
 @st.cache_data
 def tablom():
-   data = Eylemler.vericek()
+   data = Eylemler.vericek(st.session_state.session)
    return data
-
 def sifrebilgisi():
    bulunan = tablo_data[tablo_data['PYP ÖĞESİ'].str.contains(pyp_ogesi)]
    return bulunan
-
 def sgkTescil():
    sifre_subset = sifrebilgisi()
    if len(sifre_subset) == 1:
          sifre = sifre_subset[["KULLANICI ADI", "KULLANICI KODU", "SİSTEM ŞİFRESİ", "İŞ YERİ ŞİFRESİ"]]
          selenium_instance = SeleniumSgk()
          selenium_instance.sgkTescil(sifre.iloc[0,0],sifre.iloc[0,1],sifre.iloc[0,2],sifre.iloc[0,3])
-
 def sgkSistem():
    sifre_subset = sifrebilgisi()
    if len(sifre_subset) == 1:
          sifre = sifre_subset[["KULLANICI ADI", "KULLANICI KODU", "SİSTEM ŞİFRESİ", "İŞ YERİ ŞİFRESİ"]]
          selenium_instance = SeleniumSgk()
          selenium_instance.sgkSistem(sifre.iloc[0,0],sifre.iloc[0,1],sifre.iloc[0,2],sifre.iloc[0,3])
-
 def isKazasi():
    sifre_subset = sifrebilgisi()
    if len(sifre_subset) == 1:
          sifre = sifre_subset[["KULLANICI ADI", "KULLANICI KODU", "SİSTEM ŞİFRESİ", "İŞ YERİ ŞİFRESİ"]]
          selenium_instance = SeleniumSgk()
          selenium_instance.isKazasi(sifre.iloc[0,0],sifre.iloc[0,1],sifre.iloc[0,2],sifre.iloc[0,3])
-
 def vizite():
    sifre_subset = sifrebilgisi()
    if len(sifre_subset) == 1:
          sifre = sifre_subset[["KULLANICI ADI", "KULLANICI KODU", "SİSTEM ŞİFRESİ", "İŞ YERİ ŞİFRESİ"]]
          selenium_instance = SeleniumSgk()
          selenium_instance.vizite(sifre.iloc[0,0],sifre.iloc[0,1],sifre.iloc[0,2],sifre.iloc[0,3])
-
 def eBildirge():
    sifre_subset = sifrebilgisi()
    if len(sifre_subset) == 1:
          sifre = sifre_subset[["KULLANICI ADI", "KULLANICI KODU", "SİSTEM ŞİFRESİ", "İŞ YERİ ŞİFRESİ"]]
          selenium_instance = SeleniumSgk()
          selenium_instance.eBildirge(sifre.iloc[0,0],sifre.iloc[0,1],sifre.iloc[0,2],sifre.iloc[0,3])
-
 def eBildirgeV2():
    sifre_subset = sifrebilgisi()
    if len(sifre_subset) == 1:
          sifre = sifre_subset[["KULLANICI ADI", "KULLANICI KODU", "SİSTEM ŞİFRESİ", "İŞ YERİ ŞİFRESİ"]]
          selenium_instance = SeleniumSgk()
          selenium_instance.eBildirgeV2(sifre.iloc[0,0],sifre.iloc[0,1],sifre.iloc[0,2],sifre.iloc[0,3])
-
 def topluGris():
    sifre_subset = sifrebilgisi()
    if len(sifre_subset) == 1:
          sifre = sifre_subset[["KULLANICI ADI", "KULLANICI KODU", "SİSTEM ŞİFRESİ", "İŞ YERİ ŞİFRESİ"]]
          selenium_instance = SeleniumSgk()
          selenium_instance.topluGiris(sifre.iloc[0,0],sifre.iloc[0,1],sifre.iloc[0,2],sifre.iloc[0,3]) 
-
 if op == "Şifre Paneli":
    gb = GridOptionsBuilder.from_dataframe(tablom())
    gb.configure_pagination(enabled=True)
    gb.configure_default_column(editable=True,groupable=True)
    gb.configure_selection(selection_mode="multiple")
-
    # makes columns resizable, sortable and filterable by default
    gb.configure_default_column(
       resizable=True,
@@ -91,35 +85,27 @@ if op == "Şifre Paneli":
       sortable=True,
       editable=True,
       groupable=True,
-      sorteable=True,
-   )
-
+      sorteable=True,)
    gb.configure_column(
       field="ŞİRKET ADI",
       hide=True,
       header_name="ŞİRKET ADI",
       width=150,  # set width as per your requirement
       rowGroup=True,  # enables row grouping for this column
-      filterable=True,
-   )
-
+      filterable=True,)
    gb.configure_column(
       field="BÖLGE",
       header_name="BÖLGE",
       hide=True,
       rowGroup=True,  # enables row grouping for this column
-      filterable=True,
-   )
-
+      filterable=True,)
    gb.configure_column(
       field="SAP KODU",
       header_name="SAP KODU",
       pinned="left",
       width=150,  # set width as per your requirement
       rowGroup=True,
-      filterable=True,
-   )
-
+      filterable=True,)
    gb.configure_grid_options(
       groupDefaultExpanded=1,  # Gruplar başlangıçta kapalı olacak
       suppressColumnVirtualisation=True,
@@ -128,13 +114,8 @@ if op == "Şifre Paneli":
       autoGroupColumnDef=dict(
          minWidth=150,
          pinned="left",
-         cellRendererParams=dict(suppressCount=True),
-      ),
-   )
-
+         cellRendererParams=dict(suppressCount=True),),)
    gridOptions = gb.build()
-
-
    tablo = AgGrid(
       tablom(),
       editable=True,
@@ -147,11 +128,10 @@ if op == "Şifre Paneli":
       columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
       allow_unsafe_jscode=True,
       enable_quicksearch=True,)
-
-
+   
    secilisatir = tablo["selected_rows"]
-
-   if Eylemler.Admin_sorgu():
+   
+   if Eylemler.Admin_sorgu(session=st.session_state.session):
       with st.sidebar:
          with st.form("Ekle",clear_on_submit=True):
             st.header("İş Yeri Bilgileri")
@@ -199,7 +179,6 @@ if op == "Şifre Paneli":
                st.toast(body=(f"{PYPOgesi} {SAPKodu} {IsYeriAdi} GÜNCELLENDİ."))
                time.sleep(3)
                st.rerun()
-
 if op == "SGK Sistem":
    with st.form("SGKSistem"):
             st.header("İş Yeri Bilgileri")
