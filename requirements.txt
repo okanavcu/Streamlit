@@ -1,0 +1,11 @@
+streamlit
+streamlit_option_menu
+python-dotenv
+supabase
+streamlit_extras
+hydralit-components
+streamlit-aggrid
+pytesseract
+opencv-python
+selenium
+webdriver_manager

@@ -8,9 +8,6 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import shutil
 import os
-import getpass
-
-kullanici_adi = getpass.getuser()
 
 class SeleniumSgk:
     
@@ -31,15 +28,15 @@ class SeleniumSgk:
         return self.driver
     
     def ocr(self):
-        pytesseract.pytesseract.tesseract_cmd = r"Tesseract-OCR\tesseract.exe"
-        resim = cv2.imread(r"captcha.png")
+        pytesseract.pytesseract.tesseract_cmd = r"C:\Users\oavcu\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+        resim = cv2.imread(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         metin = pytesseract.image_to_string(resim)
         return metin
     
     def sgkTescil(self,kullaniciAdi,kullaniciKodu,sistemSifresi,isyeriSifresi):
         driver = self.drivers()
         driver.get("https://uyg.sgk.gov.tr/SigortaliTescil/amp/loginldap")
-        driver.find_element(By.CSS_SELECTOR, "tr:nth-child(2) > td > img").screenshot("captcha.png")
+        driver.find_element(By.CSS_SELECTOR, "tr:nth-child(2) > td > img").screenshot(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         driver.find_element(By.NAME, "j_username").send_keys(kullaniciAdi)
         driver.find_element(By.NAME, "isyeri_kod").send_keys(kullaniciKodu)
         driver.find_element(By.NAME, "j_password").send_keys(sistemSifresi)
@@ -49,17 +46,17 @@ class SeleniumSgk:
     def sgkSistem(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
         driver.get("https://uyg.sgk.gov.tr/IsverenSistemi")
-        driver.find_element(By.XPATH, "//*[@id='guvenlik_kod']").screenshot("captcha.png")
+        driver.find_element(By.XPATH, "//*[@id='guvenlik_kod']").screenshot(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_username").send_keys(kullaniciAdi)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_kod").send_keys(kullaniciKodu)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_password").send_keys(sistemSifresi)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_sifre").send_keys(isyeriSifresi)
-        # driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
+        driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
 
     def isKazasi(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
         driver.get("https://uyg.sgk.gov.tr/IsvBildirimFormu/kullanici_login.do")
-        driver.find_element(By.XPATH, "//tr[5]/td[3]/img").screenshot("captcha.png")
+        driver.find_element(By.XPATH, "//tr[5]/td[3]/img").screenshot(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         driver.find_element(By.NAME, "kullaniciAdi").send_keys(kullaniciAdi)
         driver.find_element(By.NAME, "isyeriKodu").send_keys(kullaniciKodu)
         driver.find_element(By.NAME, "isyeriSifresi").send_keys(isyeriSifresi)
@@ -68,7 +65,7 @@ class SeleniumSgk:
     def vizite(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
         driver.get("https://uyg.sgk.gov.tr/vizite/welcome.do")
-        driver.find_element(By.CSS_SELECTOR, "img:nth-child(2)").screenshot("captcha.png")
+        driver.find_element(By.CSS_SELECTOR, "img:nth-child(2)").screenshot(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         driver.find_element(By.NAME, "kullaniciAdi").send_keys(kullaniciAdi)
         driver.find_element(By.NAME, "isyeriKodu").send_keys(kullaniciKodu)
         driver.find_element(By.NAME, "isyeriSifresi").send_keys(isyeriSifresi)
@@ -77,17 +74,17 @@ class SeleniumSgk:
     def eBildirgeV2(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
         driver.get("https://ebildirge.sgk.gov.tr/EBildirgeV2")
-        driver.find_element(By.ID, "guvenlik_kod").screenshot("captcha.png")
+        driver.find_element(By.ID, "guvenlik_kod").screenshot(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_username").send_keys(kullaniciAdi)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_kod").send_keys(kullaniciKodu)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_password").send_keys(sistemSifresi)
         driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_sifre").send_keys(isyeriSifresi)
-        # driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
+        driver.find_element(By.ID, "kullaniciIlkKontrollerGiris_isyeri_guvenlik").send_keys(self.ocr())
         
     def topluGiris(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
         driver.get("https://uyg.sgk.gov.tr/SgkTescil4a/index.jsf")
-        driver.find_element(By.CSS_SELECTOR, "img:nth-child(2)").screenshot("captcha.png")
+        driver.find_element(By.CSS_SELECTOR, "img:nth-child(2)").screenshot(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         driver.find_element(By.ID, "loginForm:j_id_f").send_keys(kullaniciAdi)
         driver.find_element(By.ID, "loginForm:j_id_h").send_keys(kullaniciKodu)
         driver.find_element(By.ID, "loginForm:j_id_l").send_keys(sistemSifresi)
@@ -97,7 +94,7 @@ class SeleniumSgk:
     def eBildirge(self,kullaniciAdi, kullaniciKodu, sistemSifresi, isyeriSifresi):
         driver = self.drivers()
         driver.get("https://ebildirge.sgk.gov.tr/WPEB/amp/loginldap")
-        driver.find_element(By.CSS_SELECTOR, "tr:nth-child(2) > td:nth-child(2) > img").screenshot("captcha.png")
+        driver.find_element(By.CSS_SELECTOR, "tr:nth-child(2) > td:nth-child(2) > img").screenshot(r"C:\Users\oavcu\Uygulamalar\Streamlit\captcha.png")
         driver.find_element(By.NAME, "j_username").send_keys(kullaniciAdi)
         driver.find_element(By.NAME, "isyeri_kod").send_keys(kullaniciKodu)
         driver.find_element(By.NAME, "j_password").send_keys(sistemSifresi)
