@@ -7,6 +7,7 @@ from st_aggrid import AgGrid,GridUpdateMode,ColumnsAutoSizeMode,DataReturnMode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from datetime import datetime
 from webotomasion.main import SeleniumSgk
+from streamlit_extras.grid import grid
 
 st.set_page_config(layout='wide',initial_sidebar_state='collapsed')
 
@@ -131,7 +132,7 @@ if op == "Şifre Paneli":
    
    secilisatir = tablo["selected_rows"]
    
-   if Eylemler.Admin_sorgu(session=st.session_state.session):
+   if Eylemler.Admin_sorgu(st.session_state.session):
       with st.sidebar:
          with st.form("Ekle",clear_on_submit=True):
             st.header("İş Yeri Bilgileri")
@@ -180,18 +181,32 @@ if op == "Şifre Paneli":
                time.sleep(3)
                st.rerun()
 if op == "SGK Sistem":
-   with st.form("SGKSistem"):
-            st.header("İş Yeri Bilgileri")
-            tablo_data = tablom()
-            isyeriara = st.selectbox("İş Yeri Ara", options=tablo_data['SAP KODU'].astype(str) + " - " + tablo_data['İŞ YERİ ADI'].astype(str) + " - " + tablo_data['PYP ÖĞESİ'].astype(str),)
-            pyp_ogesi = isyeriara.split('-')[-1].strip()  # Son sütunun değerini al
-            col1,col2 = st.columns(2)
-            with col1:
-               sigortalıtescil = st.form_submit_button("Sigortalı Tescil",type="secondary",use_container_width=True,on_click=sgkTescil)
-               vizite = st.form_submit_button("Vizite",type="secondary",use_container_width=True,on_click=vizite)
-               ebildirge = st.form_submit_button("E-Bildirge",type="secondary",use_container_width=True,on_click=eBildirge)
-               toplugiris = st.form_submit_button("Toplu Giriş-Çıkış",type="secondary",use_container_width=True,on_click=topluGris)
-            with col2:
-               sgksistem = st.form_submit_button("SGK Sistem",type="secondary",use_container_width=True,on_click=sgkSistem)
-               iskazasi = st.form_submit_button("İş Kazası",type="secondary",use_container_width=True,on_click=isKazasi)
-               ebildirgev2 = st.form_submit_button("E-Bildirge V2",type="secondary",use_container_width=True,on_click=eBildirgeV2)
+   sgkSistemForm = st.form("SGKSistem")
+   with sgkSistemForm:
+      tablo_data = tablom()
+      my_grid = grid(1,1,[1,1],[1,1],[1,1],[1,1],vertical_align="top")
+      my_grid.caption("İş Yeri Bilgileri")
+      isyeriara = tablo_data['SAP KODU'].astype(str) + " - " + tablo_data['İŞ YERİ ADI'].astype(str) + " - " + tablo_data['PYP ÖĞESİ'].astype(str)
+      isyerleri = my_grid.selectbox("İş Yeri Ara", options=isyeriara)
+      pyp_ogesi = isyerleri.split('-')[-1].strip()  # Son sütunun değerini al
+      bir = my_grid.form_submit_button("Sigortalı Tescil",type="secondary",use_container_width=True)
+      iki = my_grid.form_submit_button("Vizite",type="secondary",use_container_width=True)
+      uc = my_grid.form_submit_button("E-Bildirge",type="secondary",use_container_width=True)
+      dort = my_grid.form_submit_button("Toplu Giriş-Çıkış",type="secondary",use_container_width=True)
+      bes = my_grid.form_submit_button("SGK Sistem",type="secondary",use_container_width=True)
+      alti = my_grid.form_submit_button("İş Kazası",type="secondary",use_container_width=True)
+      yedi = my_grid.form_submit_button("E-Bildirge V2",type="secondary",use_container_width=True)
+      if bir:
+         sgkTescil()
+      if iki:
+         vizite()
+      if uc:
+         eBildirge()
+      if dort:
+         topluGris()
+      if bes:
+         sgkSistem()
+      if alti:
+         isKazasi()
+      if yedi:
+         eBildirgeV2()
