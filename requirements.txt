@@ -9,3 +9,4 @@ pytesseract
 opencv-python
 selenium
 webdriver_manager
+easyocr
