@@ -3,28 +3,39 @@ import streamlit as st
 import hydralit_components as hc
 from streamlit_extras.switch_page_button import switch_page
 from database.supabaseConnect import Eylemler
+from streamlit_extras.stateful_button import button
 from st_aggrid import AgGrid,GridUpdateMode,ColumnsAutoSizeMode,DataReturnMode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from datetime import datetime
 from webotomasion.main import SeleniumSgk
 from streamlit_extras.grid import grid
 
-st.set_page_config(layout='wide',initial_sidebar_state='collapsed')
+st.set_page_config(layout='wide',initial_sidebar_state='collapsed') 
 
-with st.sidebar:
-   cıkısButon = st.button("Çıkış Yap",key="cikis")
-   if cıkısButon:
-      session = Eylemler.cıkıs()
-      st.session_state.session = None
-      st.cache_data.clear()
-      switch_page("anasayfa")
+try:
+   if st.session_state.session:
+      pass
+except:
+   switch_page("anasayfa")
+
 option_data = [
    {'label':"SGK Sistem"},
    {'label':"Şifre Paneli"},
 ]
 font_fmt = {'font-class':'h1','font-size':'100%'}
 op = hc.option_bar(option_definition=option_data,key='PrimaryOption',font_styling=font_fmt,horizontal_orientation=True)
-
+@st.cache_data
+def adminmi():
+   admin = Eylemler.Admin_sorgu(st.session_state.session)
+   return admin
+@st.cache_data
+def bolgebilgi():
+   bolge = Eylemler.bolgeKod(st.session_state.session)
+   return bolge
+@st.cache_data
+def sirketbilgi():
+   sirket = Eylemler.sirketKod(st.session_state.session)
+   return sirket
 @st.cache_data
 def tablom():
    data = Eylemler.vericek(st.session_state.session)
@@ -121,7 +132,7 @@ if op == "Şifre Paneli":
       tablom(),
       editable=True,
       gridOptions=gridOptions,
-      height=500,
+      height=700,
       theme="alpine",
       data_return_mode=DataReturnMode.AS_INPUT,
       update_on='MODEL_CHANGED',
@@ -132,55 +143,121 @@ if op == "Şifre Paneli":
    
    secilisatir = tablo["selected_rows"]
    
-   if Eylemler.Admin_sorgu(st.session_state.session):
+   if adminmi():
       with st.sidebar:
-         with st.form("Ekle",clear_on_submit=True):
+         with st.form("Şifre Paneli",clear_on_submit=True):
             st.header("İş Yeri Bilgileri")
             tablo_data = tablom()
-            SirketId = st.selectbox("ŞİRKET KOD", options=tablo_data["ŞİRKET KOD"].unique().tolist()if not secilisatir else tablo_data["ŞİRKET KOD"].unique().tolist(),label_visibility="visible",placeholder="Şirket Kod",
-                                    index=tablo_data["ŞİRKET KOD"].unique().tolist().index(secilisatir[0]["ŞİRKET KOD"]) if secilisatir else None)
-            BolgeId = st.selectbox("BÖLGE",options=tablo_data["BÖLGE"].unique().tolist() if not secilisatir else tablo_data["BÖLGE"].unique().tolist(),label_visibility="visible",placeholder="Bölge",
-                                    index=tablo_data["BÖLGE"].unique().tolist().index(secilisatir[0]["BÖLGE"]) if secilisatir else None)
-            SAPKodu = st.text_input("SAP Kodu",placeholder="SAP Kodu",value=secilisatir[0].get("SAP KODU") if secilisatir else None)
-            IsYeriAdi = st.text_input("İŞ YERİ ADI",placeholder="İş Yeri Adı",value=secilisatir[0].get('İŞ YERİ ADI') if secilisatir else None)
-            KullaniciAdi = st.text_input("KULLANICI ADI",placeholder="Kullanıcı Adı",value=secilisatir[0].get("KULLANICI ADI") if secilisatir else None)
-            KullaniciKodu = st.text_input("KULLANICI KODU",placeholder="Kullanıcı Kodu",value=secilisatir[0].get("KULLANICI KODU") if secilisatir else None)
-            SistemSifresi = st.text_input("SİSTEM ŞİFRESİ",placeholder="Sistem Şifresi",value=secilisatir[0].get("SİSTEM ŞİFRESİ") if secilisatir else None)
-            IsYeriSifresi = st.text_input("İŞ YERİ ŞİFRESİ",placeholder="İş Yeri Şifresi",value=secilisatir[0].get("İŞ YERİ ŞİFRESİ") if secilisatir else None) 
-            SGKSicilNo = st.text_input("SGK SİCİL NO",placeholder="SGK Sicil No",value=secilisatir[0].get("SGK SİCİL NO") if secilisatir else None)
-            IsYeriAdresi = st.text_input("İŞYERİ ADRESİ",placeholder="İş Yeri Adresi",value=secilisatir[0].get("İŞYERİ ADRESİ") if secilisatir else None)
-            PYPOgesi = st.text_input("PYP ÖĞESİ",placeholder="PYP Öğesi",value=secilisatir[0].get("PYP ÖĞESİ") if secilisatir else None)
+            sirket_kodlar = [item['sirketKodu'] for item in sirketbilgi()]
+            secili_sirket_kodu_index = sirket_kodlar.index(secilisatir[0]["ŞİRKET KOD"]) if secilisatir else None
+            sirketKod = st.selectbox("ŞİRKET KOD", options=sirket_kodlar, index=secili_sirket_kodu_index,placeholder="Şirket Kodu")
+            bolge_listesi = [item['bolge'] for item in bolgebilgi()]
+            secili_bolge_index = bolge_listesi.index(secilisatir[0]["BÖLGE"]) if secilisatir else None
+            bolge = st.selectbox("BÖLGE", options=bolge_listesi, index=secili_bolge_index,placeholder="Şirket Kodu"  )
+            sapKodu = st.text_input("SAP Kodu",placeholder="SAP Kodu",value=secilisatir[0].get("SAP KODU") if secilisatir else None)
+            isYeriAdi = st.text_input("İŞ YERİ ADI",placeholder="İş Yeri Adı",value=secilisatir[0].get('İŞ YERİ ADI') if secilisatir else None)
+            kullaniciAdi = st.text_input("KULLANICI ADI",placeholder="Kullanıcı Adı",value=secilisatir[0].get("KULLANICI ADI") if secilisatir else None)
+            kullaniciKodu = st.text_input("KULLANICI KODU",placeholder="Kullanıcı Kodu",value=secilisatir[0].get("KULLANICI KODU") if secilisatir else None)
+            sistemSifresi = st.text_input("SİSTEM ŞİFRESİ",placeholder="Sistem Şifresi",value=secilisatir[0].get("SİSTEM ŞİFRESİ") if secilisatir else None)
+            isYeriSifresi = st.text_input("İŞ YERİ ŞİFRESİ",placeholder="İş Yeri Şifresi",value=secilisatir[0].get("İŞ YERİ ŞİFRESİ") if secilisatir else None) 
+            sgkSicilNo = st.text_input("SGK SİCİL NO",placeholder="SGK Sicil No",value=secilisatir[0].get("SGK SİCİL NO") if secilisatir else None)
+            isYeriAdresi = st.text_input("İŞYERİ ADRESİ",placeholder="İş Yeri Adresi",value=secilisatir[0].get("İŞYERİ ADRESİ") if secilisatir else None)
+            pypOgesi = st.text_input("PYP ÖĞESİ",placeholder="PYP Öğesi",value=secilisatir[0].get("PYP ÖĞESİ") if secilisatir else None)
             try:
-               AcilisTarihi = st.date_input("Açılış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("AÇILIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
+               acilisTarihi = st.date_input("Açılış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("AÇILIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
             except:
-               AcilisTarihi = st.date_input("Açılış Tarihi",format="DD/MM/YYYY",value=None)
+               acilisTarihi = st.date_input("Açılış Tarihi",format="DD/MM/YYYY",value=None)
             try:
-               KapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("KAPANIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
+               kapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=datetime.strptime(secilisatir[0].get("KAPANIŞ TARİHİ"), "%d.%m.%Y") if secilisatir else None)
             except:
-               KapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=None)
-            # Kullanıcı formu gönderdiğinde
-            ekle = st.form_submit_button("Gönder")
+               kapanisTarihi = st.date_input("Kapanış Tarihi",format="DD/MM/YYYY",value=None)
+            ekle = st.form_submit_button(label="Ekle",use_container_width=True,)
             if ekle:
-               form_data = {  "SirketKodu": SirketId,
-                              "bolge": BolgeId,
-                              "SAPKodu": SAPKodu,
-                              "IsYeriAdi": IsYeriAdi,
-                              "KullaniciAdi": KullaniciAdi,
-                              "KullaniciKodu": KullaniciKodu,
-                              "SistemSifresi": SistemSifresi,
-                              "IsYeriSifresi": IsYeriSifresi,
-                              "SGKSicilNo": SGKSicilNo,
-                              "IsYeriAdresi": IsYeriAdresi,
-                              "PYPOgesi": PYPOgesi,
-                              "AcilişTarihi": AcilisTarihi.strftime("%d.%m.%Y"),
-                              "KapanisTarihi": KapanisTarihi.strftime("%d.%m.%Y"),
+               form_data = {  "sirketKod": sirketKod,
+                              "bolge": bolge,
+                              "sapKodu": sapKodu,
+                              "isYeriAdi": isYeriAdi,
+                              "kullaniciAdi": kullaniciAdi,
+                              "kullaniciKodu": kullaniciKodu,
+                              "sistemSifresi": sistemSifresi,
+                              "isYeriSifresi": isYeriSifresi,
+                              "sgkSicilNo": sgkSicilNo,
+                              "isYeriAdresi": isYeriAdresi,
+                              "pypOgesi": pypOgesi,
+                              "acilisTarihi": acilisTarihi,
+                              "kapanisTarihi": kapanisTarihi,
                            }
-               Eylemler.guncelle(form_data)
+               Eylemler.ekle(formdegeri=form_data)
                st.cache_data.clear()
-               st.toast(body=(f"{PYPOgesi} {SAPKodu} {IsYeriAdi} GÜNCELLENDİ."))
+               st.toast(body=(f"{pypOgesi} {sapKodu} {isYeriAdi} Eklendi."))
                time.sleep(3)
                st.rerun()
+            guncelle = st.form_submit_button("Güncelle",use_container_width=True)
+            if guncelle:
+               gunSicNo = secilisatir[0]["SGK SİCİL NO"]
+               form_data = {  "sirketKod": sirketKod,
+                              "bolge": bolge,
+                              "sapKodu": sapKodu,
+                              "isYeriAdi": isYeriAdi,
+                              "kullaniciAdi": kullaniciAdi,
+                              "kullaniciKodu": kullaniciKodu,
+                              "sistemSifresi": sistemSifresi,
+                              "isYeriSifresi": isYeriSifresi,
+                              "sgkSicilNo": sgkSicilNo,
+                              "isYeriAdresi": isYeriAdresi,
+                              "pypOgesi": pypOgesi,
+                              "acilisTarihi": acilisTarihi,
+                              "kapanisTarihi": kapanisTarihi,
+                           }
+               Eylemler.guncelle(formdegeri=form_data,günSicNo = gunSicNo)
+               st.cache_data.clear()
+               st.toast(body=(f"{pypOgesi} {sapKodu} {isYeriAdi} Güncellendi."))
+               time.sleep(3)
+               st.rerun()
+            sil = st.expander(label="Sil",expanded=False)
+            with sil:
+                  st.error("Silinsin mi?")
+                  evet = st.form_submit_button("Evet",use_container_width=True)
+                  hayir = st.form_submit_button("Hayır",use_container_width=True)
+                  if evet: 
+                     gunSicNo = secilisatir[0]["SGK SİCİL NO"]
+                     form_data = {  "sirketKod": sirketKod,
+                                    "bolge": bolge,
+                                    "sapKodu": sapKodu,
+                                    "isYeriAdi": isYeriAdi,
+                                    "kullaniciAdi": kullaniciAdi,
+                                    "kullaniciKodu": kullaniciKodu,
+                                    "sistemSifresi": sistemSifresi,
+                                    "isYeriSifresi": isYeriSifresi,
+                                    "sgkSicilNo": sgkSicilNo,
+                                    "isYeriAdresi": isYeriAdresi,
+                                    "pypOgesi": pypOgesi,
+                                    "acilisTarihi": acilisTarihi,
+                                    "kapanisTarihi": kapanisTarihi,
+                                 }
+                     Eylemler.sil(formdegeri=form_data,günSicNo = gunSicNo)
+                     st.cache_data.clear()
+                     st.toast(body=(f"{pypOgesi} {sapKodu} {isYeriAdi} Silindi."))
+                     time.sleep(3)
+                     st.rerun()
+                  
+                  if hayir:
+                     st.rerun()
+
+         cıkısButon = st.button("Çıkış Yap",key="cikis",use_container_width=True,type="primary")
+         if cıkısButon:
+            session = Eylemler.cıkıs()
+            st.session_state.session = None
+            st.cache_data.clear()
+            switch_page("anasayfa")
 if op == "SGK Sistem":
+   with st.sidebar:
+      cıkısButon = st.button("Çıkış Yap",key="cikis",use_container_width=True,type="primary")
+      if cıkısButon:
+         session = Eylemler.cıkıs()
+         st.session_state.session = None
+         st.cache_data.clear()
+         switch_page("anasayfa")
    sgkSistemForm = st.form("SGKSistem")
    with sgkSistemForm:
       tablo_data = tablom()

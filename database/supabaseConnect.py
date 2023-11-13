@@ -1,3 +1,4 @@
+from datetime import datetime
 from dotenv import load_dotenv
 import pandas as pd
 load_dotenv()
@@ -5,8 +6,8 @@ load_dotenv()
 import os
 from supabase import create_client
 
-url= os.environ.get("SUPABASE_URL")
-key= os.environ.get("SUPABASE_KEY")
+url= os.environ.get('SUPABASE_URL')
+key= os.environ.get('SUPABASE_KEY')
 supabase= create_client(url, key)
 
 class Eylemler:
@@ -14,7 +15,7 @@ class Eylemler:
     def giris(cls,mail,sifre):
         try:
             session = supabase.auth.sign_in_with_password(
-            {"email": mail, "password": sifre})
+            {'email': mail, 'password': sifre})
             return session
         except:
             pass
@@ -33,13 +34,13 @@ class Eylemler:
     def kayitOl(cls,mail,sifre,ad,soyad,bolge,sirket):
         try:
             res = supabase.auth.sign_up(
-            {"email": mail,"password": sifre,"options": 
-            {"data": {
-                "Adı": ad,
-                "SoyAdı": soyad,
-                "Admin": False,
-                "Bölgeleri": [],
-                "Şirketleri": [],
+            {'email': mail,'password': sifre,'options': 
+            {'data': {
+                'Adı': ad,
+                'SoyAdı': soyad,
+                'Admin': False,
+                'Bölgeleri': [],
+                'Şirketleri': [],
                 }}})
             return res
         except:
@@ -57,141 +58,136 @@ class Eylemler:
         df = pd.DataFrame(response.data)
         return df
     @classmethod
-    def ekle(cls,formdegeri):
-        try:
-            session = Session(bind=engine)
-            Isyeri = session.query(Isyerleri).filter(Isyerleri.SGKSicilNo == formdegeri['SGKSicilNo']).first()
-            Isyerisicil = Isyeri.SGKSicilNo if Isyeri else None
-            bolge = session.query(Bolgeler).filter(Bolgeler.bolge == formdegeri["Bolge"]).first()
-            BolgeId = bolge.id if bolge else None
-            sirket = session.query(Sirketler).filter(Sirketler.SirketKodu == formdegeri["SirketKodu"]).first()
-            SirketId = sirket.id if sirket else None
-            proje = session.query(Projeler).filter(Projeler.PYPOgesi == formdegeri["PYPOgesi"]).first()
-            Proje = proje.id if proje else None
-
-            user2 = Isyerleri(
-                                SAPKodu=formdegeri["SAPKodu"],
-                                IsYeriAdi=formdegeri["IsYeriAdi"],
-                                KullaniciAdi=formdegeri["KullaniciAdi"],
-                                KullaniciKodu=formdegeri["KullaniciKodu"],
-                                SistemSifresi=formdegeri["SistemSifresi"],
-                                IsYeriSifresi=formdegeri["IsYeriSifresi"],
-                                SGKSicilNo=formdegeri["SGKSicilNo"],
-                                IsYeriAdresi=formdegeri["IsYeriAdresi"],
-                                AcilişTarihi=formdegeri["AcilişTarihi"],
-                                KapanisTarihi=formdegeri["KapanisTarihi"]
-            )
-            
-            if BolgeId:
-                user2.BolgeId = BolgeId
-            else:
-                user2.bolge = Bolgeler(bolge=formdegeri["bolge"])
-                
-            if SirketId:
-                user2.SirketId = SirketId
-            else:
-                user2.sirket = Sirketler(SirketAdi=formdegeri["SirketAdi"],SirketKodu = formdegeri["SirketKodu"])
-            
-            if Proje is None:
-                user2.proje= Projeler(PYPOgesi = formdegeri["PYPOgesi"])
-            else:
-                user2.proje = proje
-
-            if Isyerisicil:
-                cls.guncelle(formdegeri)
-            else:
-                session.add_all([user2])
-                
-            session.commit()
-            kontrol =  0
-                
-        except Exception as e:
-            kontrol = 1
-            e.print_exc()
-            
-        finally :
-            session.close()
-            return kontrol
+    def bolgeKod(cls,session):
+        bolge = supabase.table('Bolgeler').select('bolge').execute()
+        return bolge.data
     @classmethod
-    def guncelle(cls, formdegeri):
+    def sirketKod(cls,session):
+        sirket = supabase.table('Sirketler').select('sirketKodu').execute()
+        return sirket.data
+    @classmethod
+    def ekle(cls, formdegeri):
         try:
-            session = Session(bind=engine)
-
-            # Güncellenecek kaydı sorgula
-            isyeri = session.query(Isyerleri).filter(Isyerleri.SAPKodu == formdegeri["SAPKodu"]).first()
-            
-            if isyeri is None:
-                isyeri = session.query(Isyerleri).filter(Isyerleri.SGKSicilNo == formdegeri["SGKSicilNo"]).first()
-
-            if isyeri:
-                # Mevcut veriyi güncelle
-                isyeri.IsYeriAdi = formdegeri["IsYeriAdi"]
-                isyeri.KullaniciAdi = formdegeri["KullaniciAdi"]
-                isyeri.KullaniciKodu = formdegeri["KullaniciKodu"]
-                isyeri.SistemSifresi = formdegeri["SistemSifresi"]
-                isyeri.IsYeriSifresi = formdegeri["IsYeriSifresi"]
-                isyeri.SGKSicilNo = formdegeri["SGKSicilNo"]
-                isyeri.IsYeriAdresi = formdegeri["IsYeriAdresi"]
-                isyeri.AcilişTarihi = formdegeri["AcilişTarihi"]
-                isyeri.KapanisTarihi = formdegeri["KapanisTarihi"]
-
-                # Bolge güncellemesi
-                bolge = session.query(Bolgeler).filter(Bolgeler.bolge == formdegeri["bolge"]).first()
-                if bolge:
-                    isyeri.BolgeId = bolge.id
-                else:
-                    new_bolge = Bolgeler(bolge=formdegeri["bolge"])
-                    session.add(new_bolge)
-                    session.flush()
-                    isyeri.BolgeId = new_bolge.id
-
-                # Sirket güncellemesi
-                sirket = session.query(Sirketler).filter(Sirketler.SirketKodu == formdegeri["SirketKodu"]).first()
-                if sirket:
-                    isyeri.SirketId = sirket.id
-                else:
-                    new_sirket = Sirketler(SirketAdi=formdegeri["SirketAdi"], SirketKodu=formdegeri["SirketKodu"])
-                    session.add(new_sirket)
-                    session.flush()
-                    isyeri.SirketId = new_sirket.id
-
-                # Proje güncellemesi
-                proje = session.query(Projeler).filter(Projeler.PYPOgesi == formdegeri["PYPOgesi"]).first()
-                if proje:
-                    isyeri.ProjeId = proje.id
-                else:
-                    new_proje = Projeler(IsyeriId = isyeri.id ,PYPOgesi=formdegeri["PYPOgesi"])
-                    session.add(new_proje)
-                    session.flush()
-                    isyeri.ProjeId = new_proje.id
-                    
-                kontrol =  0
-                session.commit()
-                
-                
+            isyeri_sorgu = supabase.table('IsYerleri').select('*').eq('sgkSicilNo', formdegeri['sgkSicilNo']).execute()
+            if len(isyeri_sorgu.data) > 0:
+                isyerisicil = isyeri_sorgu.data[0]['sgkSicilNo']
             else:
-                print("Güncellenecek kayıt bulunamadı.")
+                isyerisicil = None
+            bolge = supabase.table('Bolgeler').select('*').eq('bolge', formdegeri['bolge']).execute()
+            if len(bolge.data) > 0:
+                bolge_id = bolge.data[0]['id']
+            else:
+                bolge_id = None
+            sirket = supabase.table('Sirketler').select('*').eq('sirketKodu', formdegeri['sirketKod']).execute()
+            if len(sirket.data) > 0:
+                sirket_id = sirket.data[0]['id']
+            else:
+                sirket_id = None
+            proje = supabase.table('Projeler').select('*').eq('pypOgesi', formdegeri['pypOgesi']).execute()
+            if 'data' in proje and len(proje.data) > 0:
+                proje_id = proje.data[0]['id']
+            else:
+                proje_id = None
+
+            tarih_str = formdegeri['acilisTarihi']
+            if tarih_str is not None:
+                tarih_dt = datetime(tarih_str.year, tarih_str.month, tarih_str.day)
+                acilis_tarihi_str = tarih_dt.strftime('%d.%m.%Y')
+            else:
+                acilis_tarihi_str = ""
+            
+            tarih_str = formdegeri['kapanisTarihi']
+            if tarih_str is not None:
+                tarih_dt = datetime(tarih_str.year, tarih_str.month, tarih_str.day)
+                kapanis_tarihi_str = tarih_dt.strftime('%d.%m.%Y')
+            else:
+                kapanis_tarihi_str = "" 
+            user2 = {
+                'sapKodu': formdegeri['sapKodu'],
+                'isYeriAdi': formdegeri['isYeriAdi'],
+                'kullaniciAdi': formdegeri['kullaniciAdi'],
+                'kullaniciKodu': formdegeri['kullaniciKodu'],
+                'sistemSifresi': formdegeri['sistemSifresi'],
+                'isYeriSifresi': formdegeri['isYeriSifresi'],
+                'sgkSicilNo': formdegeri['sgkSicilNo'],
+                'isYeriAdresi': formdegeri['isYeriAdresi'],
+                'acilisTarihi': acilis_tarihi_str,
+                'kapanisTarihi': kapanis_tarihi_str,
+            }
+
+            if bolge_id:
+                user2["bolgeId"] = bolge_id
+            else:
+                yeni_bolge = {'bolge': formdegeri['bolge']}
+                bolge_ekle_sonuc = supabase.table('Bolgeler').insert([yeni_bolge]).execute()
+                bolge_id = bolge_ekle_sonuc['data'][0]['id']
+                user2["bolgeId"] = bolge_id
+
+            if sirket_id:
+                user2["sirketId"] = sirket_id
+            else:
+                yeni_sirket = {'sirketKodu': formdegeri['sirketKodu'], 'sirketAdi': formdegeri['sirketAdi']}
+                sirket_ekle_sonuc = supabase.table('Sirketler').insert([yeni_sirket]).execute()
+                sirket_id = sirket_ekle_sonuc['data'][0]['id']
+                user2["sirketId"] = sirket_id
+
+            if isyerisicil:
+                pass
+            else:
+                isyeri_ekle_sonuc = supabase.table('IsYerleri').insert([user2]).execute()
+                yeni_isyeri_id = isyeri_ekle_sonuc.data[0]['id']
+
+            if proje_id is None:
+                yeni_proje = {'isYeriId': yeni_isyeri_id, 'pypOgesi': formdegeri['pypOgesi']}
+                proje_ekle_sonuc = supabase.table('Projeler').insert([yeni_proje]).execute()
+            else:
+                pass
+
+            kontrol = 0
         except Exception as e:
             kontrol = 1
-        finally:
-            session.close()
-            return kontrol
-    @classmethod        
-    def sil(cls, formdegeri):
-        try:
-            #bağlantı kur
-            session = Session(bind=engine)
-            # Silinecek kaydı sorgula
-            isyeri = session.query(Isyerleri).filter(Isyerleri.SGKSicilNo == formdegeri["SGKSicilNo"]).first()
-            if isyeri:
-                projeler_to_delete = session.query(Projeler).filter(Projeler.IsyeriId == isyeri.id).all()
-                session.query(Projeler).filter(Projeler.PYPOgesi == formdegeri["PYPOgesi"]).delete(synchronize_session=False)
-                session.commit()
-                if len(projeler_to_delete) == 1:
-                # isyeri kaydını sil
-                    session.delete(isyeri)
-                    session.commit()
-        except Exception as e:
             print(e)
         finally:
-            session.close()
+            return kontrol
+    @classmethod
+    def guncelle(cls, formdegeri,günSicNo):
+        sirket = supabase.table('Sirketler').select('*').eq('sirketKodu', formdegeri['sirketKod']).execute()
+        if len(sirket.data) > 0:
+            sirket_id = sirket.data[0]['id']
+        bolge = supabase.table('Bolgeler').select('*').eq('bolge', formdegeri['bolge']).execute()
+        if len(bolge.data) > 0:
+            bolge_id = bolge.data[0]['id']
+        tarih_str = formdegeri['acilisTarihi']
+        if tarih_str is not None:
+            tarih_dt = datetime(tarih_str.year, tarih_str.month, tarih_str.day)
+            acilis_tarihi_str = tarih_dt.strftime('%d.%m.%Y')
+        else:
+            acilis_tarihi_str = ""
+        
+        tarih_str = formdegeri['kapanisTarihi']
+        if tarih_str is not None:
+            tarih_dt = datetime(tarih_str.year, tarih_str.month, tarih_str.day)
+            kapanis_tarihi_str = tarih_dt.strftime('%d.%m.%Y')
+        else:
+            kapanis_tarihi_str = "" 
+
+        # Eğer formdegeri['acilisTarihi'] bir datetime.date nesnesi olarak geliyorsa:
+        acilis_tarihi_str = formdegeri['acilisTarihi'].strftime('%d.%m.%Y')
+        supabase.table("IsYerleri").update({
+            "sirketId": sirket_id,
+            "bolgeId": bolge_id,
+            "sapKodu": formdegeri['sapKodu'],
+            "isYeriAdi": formdegeri['isYeriAdi'],
+            "kullaniciAdi": formdegeri['kullaniciAdi'],
+            "kullaniciKodu": formdegeri['kullaniciKodu'],
+            "sistemSifresi": formdegeri['sistemSifresi'],
+            "isYeriSifresi": formdegeri['isYeriSifresi'],
+            "sgkSicilNo": formdegeri['sgkSicilNo'],
+            "isYeriAdresi": formdegeri['isYeriAdresi'],
+            "acilisTarihi": acilis_tarihi_str,
+            "kapanisTarihi": kapanis_tarihi_str
+        }).eq("sgkSicilNo", günSicNo).execute()
+
+    @classmethod        
+    def sil(cls, formdegeri,günSicNo):
+        supabase.table("IsYerleri").delete().eq("sgkSicilNo", günSicNo).execute()
